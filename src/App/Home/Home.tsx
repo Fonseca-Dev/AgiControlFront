@@ -116,7 +116,6 @@ const Home: React.FC = () => {
   const [showBalance, setShowBalance] = React.useState(false);
   const [saldo, setSaldo] = useState<number | null>(null);
   const [numeroConta, setNumeroConta] = useState<string | null>(null);
-  const [saldoChanged, setSaldoChanged] = useState(false);
 
   const [transacoesSelecionadas, setTransacoesSelecionadas] = useState<Transacao[]>([]);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState<string>('');
@@ -596,17 +595,6 @@ const Home: React.FC = () => {
     }
   }, []);
 
-  // useEffect para detectar mudanças no saldo e animar
-  useEffect(() => {
-    if (saldo !== null && !isLoadingSaldo) {
-      setSaldoChanged(true);
-      const timer = setTimeout(() => {
-        setSaldoChanged(false);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [saldo, isLoadingSaldo]);
-
   const handleProfileClick = () => {
     navigate("/perfil");
   };
@@ -796,6 +784,8 @@ const Home: React.FC = () => {
               gap: '16px'
             }}>
 
+              
+
               {/* Card Gastos Total */}
               <div style={{
                 height: '80px',
@@ -897,6 +887,203 @@ const Home: React.FC = () => {
                 </div>
               </div>
 
+              {/* Card Resumo de gastos 2 */}
+              <div style={{
+                width: '100%',
+                height: '170px',
+                backgroundColor: 'white',
+                borderRadius: '16px',
+                border: '1px solid #e2e8f0',
+                padding: '20px',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-start',
+                boxSizing: 'border-box'
+              }}>
+                {/* Título */}
+                <div style={{
+                  color: '#0065F5',
+                  fontSize: '16px',
+                  fontWeight: '900',
+                  marginBottom: '8px'
+                }}>
+                  Resumo de gastos do mês atual
+                </div>
+
+                {/* Linhas de informação */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '5px',
+                  flex: 1
+                }}>
+                  {/* Pix */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    height: '20px'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <div style={{
+                        width: '8px',
+                        height: '2px',
+                        backgroundColor: '#000000',
+                        flexShrink: 0
+                      }}></div>
+                      <span style={{
+                        color: '#000000',
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        lineHeight: '1'
+                      }}>
+                        PIX
+                      </span>
+                    </div>
+                    <span style={{
+                      color: '#0065F5',
+                      fontSize: '16px',
+                      fontWeight: '700',
+                      lineHeight: '1'
+                    }}>
+                      {isLoadingGastos ? (
+                        <ValueSkeleton width="80px" />
+                      ) : (
+                        `R$ ${gastosPorTipoMensal.pix.toFixed(2).replace('.', ',')}`
+                      )}
+                    </span>
+                  </div>
+
+                  {/* Débito */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    height: '20px'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <div style={{
+                        width: '8px',
+                        height: '2px',
+                        backgroundColor: '#000000',
+                        flexShrink: 0
+                      }}></div>
+                      <span style={{
+                        color: '#000000',
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        lineHeight: '1'
+                      }}>
+                        Débito
+                      </span>
+                    </div>
+                    <span style={{
+                      color: '#0065F5',
+                      fontSize: '16px',
+                      fontWeight: '700',
+                      lineHeight: '1'
+                    }}>
+                      {isLoadingGastos ? (
+                        <ValueSkeleton width="80px" />
+                      ) : (
+                        `R$ ${gastosPorTipoMensal.debito.toFixed(2).replace('.', ',')}`
+                      )}
+                    </span>
+                  </div>
+
+                  {/* Boleto */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    height: '20px'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <div style={{
+                        width: '8px',
+                        height: '2px',
+                        backgroundColor: '#000000',
+                        flexShrink: 0
+                      }}></div>
+                      <span style={{
+                        color: '#000000',
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        lineHeight: '1'
+                      }}>
+                        Boleto
+                      </span>
+                    </div>
+                    <span style={{
+                      color: '#0065F5',
+                      fontSize: '16px',
+                      fontWeight: '700',
+                      lineHeight: '1'
+                    }}>
+                      {isLoadingGastos ? (
+                        <ValueSkeleton width="80px" />
+                      ) : (
+                        `R$ ${gastosPorTipoMensal.boleto.toFixed(2).replace('.', ',')}`
+                      )}
+                    </span>
+                  </div>
+
+                  {/* TED */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    height: '20px'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <div style={{
+                        width: '8px',
+                        height: '2px',
+                        backgroundColor: '#000000',
+                        flexShrink: 0
+                      }}></div>
+                      <span style={{
+                        color: '#000000',
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        lineHeight: '1'
+                      }}>
+                        TED
+                      </span>
+                    </div>
+                    <span style={{
+                      color: '#0065F5',
+                      fontSize: '16px',
+                      fontWeight: '700',
+                      lineHeight: '1'
+                    }}>
+                      {isLoadingGastos ? (
+                        <ValueSkeleton width="80px" />
+                      ) : (
+                        `R$ ${gastosPorTipoMensal.transferencia.toFixed(2).replace('.', ',')}`
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               {/* Card Resumo de gastos */}
               <div style={{
                 width: '100%',
@@ -943,7 +1130,7 @@ const Home: React.FC = () => {
                       <div style={{
                         width: '8px',
                         height: '2px',
-                        backgroundColor: '#00CD5C',
+                        backgroundColor: '#000000',
                         flexShrink: 0
                       }}></div>
                       <span style={{
@@ -956,7 +1143,7 @@ const Home: React.FC = () => {
                       </span>
                     </div>
                     <span style={{
-                      color: '#00CD5C',
+                      color: '#0065F5',
                       fontSize: '16px',
                       fontWeight: '700',
                       lineHeight: '1'
@@ -984,7 +1171,7 @@ const Home: React.FC = () => {
                       <div style={{
                         width: '8px',
                         height: '2px',
-                        backgroundColor: '#0065F5',
+                        backgroundColor: '#000000',
                         flexShrink: 0
                       }}></div>
                       <span style={{
@@ -1025,7 +1212,7 @@ const Home: React.FC = () => {
                       <div style={{
                         width: '8px',
                         height: '2px',
-                        backgroundColor: '#f59e0b',
+                        backgroundColor: '#000000',
                         flexShrink: 0
                       }}></div>
                       <span style={{
@@ -1038,7 +1225,7 @@ const Home: React.FC = () => {
                       </span>
                     </div>
                     <span style={{
-                      color: '#f59e0b',
+                      color: '#0065F5',
                       fontSize: '16px',
                       fontWeight: '700',
                       lineHeight: '1'
@@ -1066,7 +1253,7 @@ const Home: React.FC = () => {
                       <div style={{
                         width: '8px',
                         height: '2px',
-                        backgroundColor: '#ef4444',
+                        backgroundColor: '#000000',
                         flexShrink: 0
                       }}></div>
                       <span style={{
@@ -1079,7 +1266,7 @@ const Home: React.FC = () => {
                       </span>
                     </div>
                     <span style={{
-                      color: '#ef4444',
+                      color: '#0065F5',
                       fontSize: '16px',
                       fontWeight: '700',
                       lineHeight: '1'
@@ -1118,238 +1305,6 @@ const Home: React.FC = () => {
                         <ValueSkeleton width="80px" />
                       ) : (
                         `R$ ${gastoHoje.toFixed(2).replace('.', ',')}`
-                      )}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card Resumo de gastos 2 */}
-              <div style={{
-                width: '100%',
-                height: '200px',
-                backgroundColor: 'white',
-                borderRadius: '16px',
-                border: '1px solid #e2e8f0',
-                padding: '20px',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'flex-start',
-                boxSizing: 'border-box'
-              }}>
-                {/* Título */}
-                <div style={{
-                  color: '#0065F5',
-                  fontSize: '16px',
-                  fontWeight: '900',
-                  marginBottom: '8px'
-                }}>
-                  Resumo de gastos do mês atual
-                </div>
-
-                {/* Linhas de informação */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '5px',
-                  flex: 1
-                }}>
-                  {/* Pix */}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    height: '20px'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}>
-                      <div style={{
-                        width: '8px',
-                        height: '2px',
-                        backgroundColor: '#00CD5C',
-                        flexShrink: 0
-                      }}></div>
-                      <span style={{
-                        color: '#000000',
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        lineHeight: '1'
-                      }}>
-                        PIX
-                      </span>
-                    </div>
-                    <span style={{
-                      color: '#00CD5C',
-                      fontSize: '16px',
-                      fontWeight: '700',
-                      lineHeight: '1'
-                    }}>
-                      {isLoadingGastos ? (
-                        <ValueSkeleton width="80px" />
-                      ) : (
-                        `R$ ${gastosPorTipoMensal.pix.toFixed(2).replace('.', ',')}`
-                      )}
-                    </span>
-                  </div>
-
-                  {/* Débito */}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    height: '20px'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}>
-                      <div style={{
-                        width: '8px',
-                        height: '2px',
-                        backgroundColor: '#0065F5',
-                        flexShrink: 0
-                      }}></div>
-                      <span style={{
-                        color: '#000000',
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        lineHeight: '1'
-                      }}>
-                        Débito
-                      </span>
-                    </div>
-                    <span style={{
-                      color: '#0065F5',
-                      fontSize: '16px',
-                      fontWeight: '700',
-                      lineHeight: '1'
-                    }}>
-                      {isLoadingGastos ? (
-                        <ValueSkeleton width="80px" />
-                      ) : (
-                        `R$ ${gastosPorTipoMensal.debito.toFixed(2).replace('.', ',')}`
-                      )}
-                    </span>
-                  </div>
-
-                  {/* Boleto */}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    height: '20px'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}>
-                      <div style={{
-                        width: '8px',
-                        height: '2px',
-                        backgroundColor: '#f59e0b',
-                        flexShrink: 0
-                      }}></div>
-                      <span style={{
-                        color: '#000000',
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        lineHeight: '1'
-                      }}>
-                        Boleto
-                      </span>
-                    </div>
-                    <span style={{
-                      color: '#f59e0b',
-                      fontSize: '16px',
-                      fontWeight: '700',
-                      lineHeight: '1'
-                    }}>
-                      {isLoadingGastos ? (
-                        <ValueSkeleton width="80px" />
-                      ) : (
-                        `R$ ${gastosPorTipoMensal.boleto.toFixed(2).replace('.', ',')}`
-                      )}
-                    </span>
-                  </div>
-
-                  {/* TED */}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    height: '20px'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}>
-                      <div style={{
-                        width: '8px',
-                        height: '2px',
-                        backgroundColor: '#ef4444',
-                        flexShrink: 0
-                      }}></div>
-                      <span style={{
-                        color: '#000000',
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        lineHeight: '1'
-                      }}>
-                        TED
-                      </span>
-                    </div>
-                    <span style={{
-                      color: '#ef4444',
-                      fontSize: '16px',
-                      fontWeight: '700',
-                      lineHeight: '1'
-                    }}>
-                      {isLoadingGastos ? (
-                        <ValueSkeleton width="80px" />
-                      ) : (
-                        `R$ ${gastosPorTipoMensal.transferencia.toFixed(2).replace('.', ',')}`
-                      )}
-                    </span>
-                  </div>
-
-                  {/* Gasto mensal total */}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    height: '20px',
-                    marginTop: '5px'
-                  }}>
-                    <span style={{
-                      color: '#000000',
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      lineHeight: '1'
-                    }}>
-                      Total do mês
-                    </span>
-                    <span style={{
-                      color: '#000000',
-                      fontSize: '16px',
-                      fontWeight: '700',
-                      lineHeight: '1'
-                    }}>
-                      {isLoadingGastos ? (
-                        <ValueSkeleton width="80px" />
-                      ) : (
-                        `R$ ${(
-                          gastosPorTipoMensal.pix + 
-                          gastosPorTipoMensal.debito + 
-                          gastosPorTipoMensal.boleto + 
-                          gastosPorTipoMensal.transferencia
-                        ).toFixed(2).replace('.', ',')}`
                       )}
                     </span>
                   </div>
@@ -1785,8 +1740,8 @@ const Home: React.FC = () => {
               </h3>
               {/* Banner informativo - Gráfico clicável */}
               <div style={{
-                backgroundColor: '#FEF3C7',
-                border: '1px solid #FCD34D',
+                backgroundColor: '#EFF6FF',
+                border: '1px solid #BFDBFE',
                 borderRadius: '8px',
                 padding: '12px 16px',
                 marginBottom: '16px',
@@ -1799,20 +1754,19 @@ const Home: React.FC = () => {
               }}>
                 <svg 
                   style={{ width: '20px', height: '20px', flexShrink: 0 }} 
-                  fill="#D97706" 
+                  fill="#3B82F6" 
                   viewBox="0 0 24 24"
                 >
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                 </svg>
-                <p style={{ 
-                  margin: 0, 
-                  color: '#92400E', 
+                <span style={{ 
+                  color: '#1E40AF', 
                   fontSize: '13px',
                   fontWeight: '500',
                   lineHeight: '1.4'
                 }}>
-                  <strong>Dica:</strong> Clique no gráfico ou nas categorias abaixo para ver transações detalhadas!
-                </p>
+                  <strong>Dica: </strong>Clique no gráfico ou nas categorias abaixo para ver transações detalhadas!
+                </span>
               </div>
               {gastosPorCategoria.length > 0 ? (
                 <div style={{ width: '100%', maxWidth: '400px' }}>
@@ -2653,7 +2607,6 @@ const Home: React.FC = () => {
           <div style={{ 
             marginTop: '0px', 
             position: 'relative',
-            animation: saldoChanged ? 'highlightGreen 1s ease-out' : 'none',
             borderRadius: '12px',
             padding: '8px',
             transition: 'all 0.3s ease'
@@ -2667,8 +2620,7 @@ const Home: React.FC = () => {
                 color: 'white',
                 fontFamily: 'system-ui, -apple-system, sans-serif',
                 whiteSpace: 'nowrap', // impede quebra de linha
-                display: 'inline-block',
-                animation: saldoChanged ? 'saldoBounce 0.6s ease-out' : 'none'
+                display: 'inline-block'
               }}>
                 {isLoadingSaldo ? (
                   <ValueSkeleton width="120px" />
