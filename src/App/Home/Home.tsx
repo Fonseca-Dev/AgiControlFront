@@ -240,7 +240,7 @@ const Home: React.FC = () => {
       const [ano, mes] = (mesAnoSelecionado || mesSelecionadoGrafico).split('-');
       
       // Buscar dados mensais
-      const urlMensal = `https://sistema-gastos-694972193726.southamerica-east1.run.app/usuarios/${usuarioId}/contas/${contaId}/gastosPorMes?ano=${ano}&mes=${mes}`;
+      const urlMensal = `https://sistema-gastos-694972193726.southamerica-east1.run.app/usuarios/${usuarioId}/contas/${contaId}/transacoes/gastosPorMes?ano=${ano}&mes=${mes}`;
       console.log('Buscando dados dos gráficos:', urlMensal);
       const responseMensal = await fetch(urlMensal);
       const dataMensal = await responseMensal.json();
@@ -348,7 +348,7 @@ const Home: React.FC = () => {
         const mes = String(hoje.getMonth() + 1).padStart(2, '0'); // Garante 2 dígitos
 
         // Monta a URL com os parâmetros formatados
-        const url = `https://sistema-gastos-694972193726.southamerica-east1.run.app/usuarios/${usuarioId}/contas/${contaId}/resumoGastoDaContaPorMes?ano=${ano}&mes=${mes}`;
+        const url = `https://sistema-gastos-694972193726.southamerica-east1.run.app/usuarios/${usuarioId}/contas/${contaId}/transacoes/resumoGastoDaContaPorMes?ano=${ano}&mes=${mes}`;
         console.log('Buscando gastos do mes:', { ano, mes, url });
         
         const response = await fetch(url);
@@ -424,7 +424,7 @@ const Home: React.FC = () => {
         const dia = String(hoje.getDate()).padStart(2, '0'); // Garante 2 dígitos
 
         // Monta a URL com os parâmetros formatados
-        const url = `https://sistema-gastos-694972193726.southamerica-east1.run.app/usuarios/${usuarioId}/contas/${contaId}/gastosPorDia?ano=${ano}&mes=${mes}&dia=${dia}`;
+        const url = `https://sistema-gastos-694972193726.southamerica-east1.run.app/usuarios/${usuarioId}/contas/${contaId}//transacoes/resumoGastoDaContaPorDia?ano=${ano}&mes=${mes}&dia=${dia}`;
         console.log('Buscando gastos do dia:', { ano, mes, dia, url });
         
         const response = await fetch(url);
