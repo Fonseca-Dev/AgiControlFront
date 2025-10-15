@@ -3,6 +3,7 @@ import { Eye, EyeOff, Bell, MessageCircle, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Menubar from "../Menubar/Menubar";
 import { Doughnut, Bar } from 'react-chartjs-2';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import type { ChartEvent, ActiveElement } from 'chart.js';
 
 interface Transacao {
@@ -173,6 +174,41 @@ const Home: React.FC = () => {
     return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
   });
   const [gastosPorCategoria, setGastosPorCategoria] = useState<Array<{name: string, value: number, color: string}>>([]);
+  const [gastosMensais, setGastosMensais] = useState<Array<{
+    date: string;
+    [key: string]: string | number;
+  }>>([]);
+  const [anoSelecionadoGrafico, setAnoSelecionadoGrafico] = useState<number>(() => {
+    const hoje = new Date();
+    return hoje.getFullYear();
+  });
+  const [anosDisponiveis, setAnosDisponiveis] = useState<number[]>([]);
+  const [isAnoSelectOpen, setIsAnoSelectOpen] = useState(false);
+
+  // Cores para categorias - definição global
+  const categoryColors: { [key: string]: string } = {
+    'Alimentação': '#FF6B6B',
+    'Transporte': '#4CAF50',
+    'Moradia': '#2196F3',
+    'Contas e Serviços': '#9C27B0',
+    'Saúde': '#00BCD4',
+    'Educação': '#3F51B5',
+    'Lazer': '#FF9800',
+    'Vestuário': '#E91E63',
+    'Beleza e Cuidados Pessoais': '#F06292',
+    'Tecnologia': '#607D8B',
+    'Assinaturas e Streaming': '#8E24AA',
+    'Pets': '#FFA726',
+    'Doações e Presentes': '#FFD93D',
+    'Transferência Pessoal': '#90A4AE',
+    'Serviços': '#26A69A',
+    'Impostos e Taxas': '#78909C',
+    'Viagens': '#29B6F6',
+    'Investimentos': '#66BB6A',
+    'Emergências': '#EF5350',
+    'Outros': '#BDBDBD'
+  };
+
   const [gastosPorTipo, setGastosPorTipo] = useState<{
     pix: number;
     debito: number;
@@ -226,6 +262,81 @@ const Home: React.FC = () => {
       }
     } catch (error) {
       console.error("Erro ao buscar meses disponíveis:", error);
+    }
+  };
+
+  // Função para buscar os anos disponíveis com transações
+  const fetchAnosDisponiveis = async () => {
+    const usuarioId = localStorage.getItem("userID");
+    const contaId = localStorage.getItem("contaID");
+    
+    if (!usuarioId || !contaId) return;
+
+    try {
+      const url = `https://sistema-gastos-694972193726.southamerica-east1.run.app/usuarios/${usuarioId}/contas/${contaId}/transacoes`;
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      if (data && data.objeto && Array.isArray(data.objeto)) {
+        // Extrair anos únicos das transações
+        const anos = data.objeto.map((transacao: any) => {
+          const date = new Date(transacao.data);
+          return date.getFullYear();
+        });
+        
+        // Remover duplicatas e ordenar do mais recente para o mais antigo
+        const anosUnicos = Array.from(new Set(anos)).sort((a: any, b: any) => (b as number) - (a as number)) as number[];
+        setAnosDisponiveis(anosUnicos);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar anos disponíveis:", error);
+    }
+  };
+
+  // Função para buscar dados dos gastos mensais do ano
+  const buscarDadosAnuais = async (anoSelecionado?: number) => {
+    const usuarioId = localStorage.getItem("userID");
+    const contaId = localStorage.getItem("contaID");
+    
+    if (!usuarioId || !contaId) return;
+
+    try {
+      const ano = anoSelecionado || anoSelecionadoGrafico;
+      
+      const url = `https://sistema-gastos-694972193726.southamerica-east1.run.app/usuarios/${usuarioId}/contas/${contaId}/transacoes/gastosPorMesAno?ano=${ano}`;
+      console.log('Buscando dados anuais:', url);
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      if (data?.status === "OK" && Array.isArray(data.objeto)) {
+        console.log('Dados anuais recebidos:', JSON.stringify(data.objeto, null, 2));
+        
+        // Criar um array com todos os 12 meses do ano
+        const mesesDoAno = [
+          'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+          'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+        ];
+        
+        // Inicializar todos os meses com valor 0
+        const dadosMensaisCompletos = mesesDoAno.map((mes) => ({
+          date: mes,
+          total: 0
+        }));
+
+        // Processar os dados recebidos da API
+        data.objeto.forEach((mesData: any) => {
+          const dataObj = new Date(mesData.mes);
+          const mesIndex = dataObj.getMonth(); // 0-11
+          
+          // Adicionar o total de gastos ao mês correspondente
+          dadosMensaisCompletos[mesIndex].total = mesData.totalGasto || 0;
+        });
+        
+        console.log('Dados processados:', dadosMensaisCompletos);
+        setGastosMensais(dadosMensaisCompletos);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar dados anuais:", error);
     }
   };
 
@@ -594,6 +705,35 @@ const Home: React.FC = () => {
         });
     }
   }, []);
+
+  // Effect para buscar anos disponíveis quando entrar na seção de gráficos
+  useEffect(() => {
+    if (activeSection === 'graficos' && anosDisponiveis.length === 0) {
+      fetchAnosDisponiveis();
+    }
+  }, [activeSection]);
+
+  // Effect para buscar dados anuais quando o ano selecionado mudar
+  useEffect(() => {
+    if (activeSection === 'graficos' && anoSelecionadoGrafico) {
+      buscarDadosAnuais(anoSelecionadoGrafico);
+    }
+  }, [anoSelecionadoGrafico, activeSection]);
+
+  // Effect para fechar o dropdown de anos quando clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isAnoSelectOpen) {
+        const target = event.target as HTMLElement;
+        if (!target.closest('[data-ano-select-dropdown]')) {
+          setIsAnoSelectOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isAnoSelectOpen]);
 
   const handleProfileClick = () => {
     navigate("/perfil");
@@ -1983,6 +2123,250 @@ const Home: React.FC = () => {
                   color: '#64748b'
                 }}>
                   Carregando dados...
+                </div>
+              )}
+            </div>
+
+            {/* Gráfico de Barras - Gastos Mensais do Ano */}
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '16px',
+              border: '1px solid #e2e8f0',
+              padding: '20px',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+              minHeight: '700px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
+            }}>
+              <h3 style={{ color: '#0065F5', fontSize: '18px', fontWeight: '600', marginBottom: '8px', textAlign: 'center' }}>
+                Gastos Mensais do Ano
+              </h3>
+              {/* Banner informativo */}
+              <div style={{
+                backgroundColor: '#EFF6FF',
+                border: '1px solid #BFDBFE',
+                borderRadius: '8px',
+                padding: '12px 16px',
+                marginBottom: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                width: '100%',
+                maxWidth: '600px',
+                animation: 'slideIn 0.5s ease-out'
+              }}>
+                <svg 
+                  style={{ width: '20px', height: '20px', flexShrink: 0 }} 
+                  fill="#3B82F6" 
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+                <span style={{ 
+                  color: '#1E40AF', 
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  lineHeight: '1.4'
+                }}>
+                  <strong>Dica: </strong>Visualize o total de gastos mensais ao longo do ano!
+                </span>
+              </div>
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'flex-end', 
+                alignItems: 'center', 
+                width: '100%', 
+                marginBottom: '8px',
+                position: 'relative'
+              }}>
+                {/* Select de anos */}
+                <div style={{ position: 'relative', minWidth: '200px' }} data-ano-select-dropdown>
+                  <button
+                    onClick={() => setIsAnoSelectOpen(!isAnoSelectOpen)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      borderRadius: '12px',
+                      border: '1px solid #e2e8f0',
+                      backgroundColor: 'white',
+                      color: '#1e293b',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#0065F5';
+                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 101, 245, 0.2)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#e2e8f0';
+                      e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+                    }}
+                  >
+                    <span>Ano de {anoSelecionadoGrafico}</span>
+                    <svg 
+                      style={{ 
+                        width: '16px', 
+                        height: '16px',
+                        transition: 'transform 0.2s ease',
+                        transform: isAnoSelectOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+                      }} 
+                      fill="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M7 10l5 5 5-5z"/>
+                    </svg>
+                  </button>
+                  
+                  {/* Dropdown de anos */}
+                  {isAnoSelectOpen && (
+                    <div style={{
+                      position: 'absolute',
+                      top: 'calc(100% + 4px)',
+                      right: 0,
+                      minWidth: '200px',
+                      maxHeight: '300px',
+                      overflowY: 'auto',
+                      backgroundColor: 'white',
+                      borderRadius: '12px',
+                      border: '1px solid #e2e8f0',
+                      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.15)',
+                      zIndex: 1000,
+                      animation: 'slideIn 0.2s ease-out',
+                      padding: '4px 0'
+                    }}>
+                      {anosDisponiveis.length > 0 ? (
+                        anosDisponiveis.map(ano => {
+                          const isSelected = ano === anoSelecionadoGrafico;
+                          
+                          return (
+                            <button
+                              key={ano}
+                              onClick={() => {
+                                setAnoSelecionadoGrafico(ano);
+                                buscarDadosAnuais(ano);
+                                setIsAnoSelectOpen(false);
+                              }}
+                              style={{
+                                width: '100%',
+                                padding: '10px 16px',
+                                border: 'none',
+                                backgroundColor: isSelected ? '#EFF6FF' : 'transparent',
+                                color: isSelected ? '#0065F5' : '#1e293b',
+                                fontSize: '14px',
+                                fontWeight: isSelected ? '600' : '400',
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                                transition: 'all 0.2s ease'
+                              }}
+                              onMouseEnter={(e) => {
+                                if (!isSelected) {
+                                  e.currentTarget.style.backgroundColor = '#F8FAFC';
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (!isSelected) {
+                                  e.currentTarget.style.backgroundColor = 'transparent';
+                                }
+                              }}
+                            >
+                              Ano de {ano}
+                            </button>
+                          );
+                        })
+                      ) : (
+                        <div style={{ padding: '10px 16px', color: '#64748b', fontSize: '14px' }}>
+                          Nenhum ano com transações
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+              {gastosMensais.length > 0 ? (
+                <div style={{ 
+                  width: '100%', 
+                  height: '600px', 
+                  overflowX: 'auto',
+                  overflowY: 'hidden'
+                }}>
+                  <div style={{ 
+                    minWidth: '1200px',
+                    height: '100%'
+                  }}>
+                    <Bar
+                      data={{
+                        labels: gastosMensais.map(d => d.date),
+                        datasets: [{
+                          label: 'Total de Gastos',
+                          data: gastosMensais.map(d => d.total || 0),
+                          backgroundColor: '#0065F5',
+                          borderColor: '#0065F5',
+                          borderWidth: 1,
+                          borderRadius: 8,
+                          barThickness: 60,
+                        }]
+                      }}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                          x: {
+                            grid: {
+                              display: false
+                            }
+                          },
+                          y: {
+                            display: false,
+                            beginAtZero: true
+                          }
+                        },
+                        plugins: {
+                          tooltip: {
+                            callbacks: {
+                              label: function(context) {
+                                const value = context.parsed.y;
+                                return 'Total: R$ ' + value.toFixed(2);
+                              }
+                            }
+                          },
+                          legend: {
+                            display: false
+                          },
+                          datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: (value: number) => {
+                              return 'R$ ' + value.toFixed(2).replace('.', ',');
+                            },
+                            color: '#1e293b',
+                            font: {
+                              weight: 'bold',
+                              size: 12
+                            }
+                          }
+                        }
+                      }}
+                      plugins={[ChartDataLabels]}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center', 
+                  height: '300px',
+                  color: '#64748b',
+                  fontSize: '16px'
+                }}>
+                  Nenhum dado disponível para o ano selecionado
                 </div>
               )}
             </div>
