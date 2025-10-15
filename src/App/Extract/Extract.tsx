@@ -4,6 +4,7 @@ import { useTransacao } from "../../contexts/TransacaoContext";
 import type { Transacao } from "../../contexts/TransacaoContext";
 import { useTipoTransacao } from "../../contexts/TipoTransacaoContext";
 import pixIcon from "../../assets/images/pix.png";
+import iosShareIcon from "../../assets/images/ios_share.png";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
@@ -538,8 +539,8 @@ const Extract: React.FC = () => {
         data-export-menu
         style={{
           position: 'fixed',
-          right: '16px',
-          top: '285px',
+          right: '5%',
+          top: '31%',
           zIndex: 1010
         }}
       >
@@ -549,25 +550,25 @@ const Extract: React.FC = () => {
             width: '40px',
             height: '40px',
             borderRadius: '50%',
-            backgroundColor: 'white',
+            backgroundColor: 'transparent',
             border: 'none',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          
             transition: 'all 0.2s ease'
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.1)';
-            e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.2)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-          }}
         >
-          <span style={{ fontSize: '20px' }}>📥</span>
+          <img 
+            src={iosShareIcon} 
+            alt="Exportar" 
+            style={{ 
+              width: '25px', 
+              height: '25px',
+              objectFit: 'contain'
+            }} 
+          />
         </button>
 
         {/* Menu de Exportação */}
@@ -702,7 +703,7 @@ const Extract: React.FC = () => {
         {/* Entradas */}
         <div style={{ textAlign: 'center' }}>
           <div style={{ color: 'white', fontSize: '14px', opacity: 0.8 }}>Entradas</div>
-          <div style={{ color: '#4ade80', fontSize: '16px', fontWeight: 'bold', marginTop: '4px' }}>
+          <div style={{ color: 'white', fontSize: '16px', fontWeight: 'bold', marginTop: '4px' }}>
             {isTransacoesLoading ? (
               <div style={{
                 width: '80px',
@@ -723,7 +724,7 @@ const Extract: React.FC = () => {
         {/* Carteiras */}
         <div style={{ textAlign: 'center' }}>
           <div style={{ color: 'white', fontSize: '14px', opacity: 0.8 }}>Carteiras</div>
-          <div style={{ color: '#fbbf24', fontSize: '16px', fontWeight: 'bold', marginTop: '4px' }}>
+          <div style={{ color: 'white', fontSize: '16px', fontWeight: 'bold', marginTop: '4px' }}>
             {isTransacoesLoading ? (
               <div style={{
                 width: '80px',
@@ -741,7 +742,7 @@ const Extract: React.FC = () => {
         {/* Saídas */}
         <div style={{ textAlign: 'center' }}>
           <div style={{ color: 'white', fontSize: '14px', opacity: 0.8 }}>Saídas</div>
-          <div style={{ color: '#ef4444', fontSize: '16px', fontWeight: 'bold', marginTop: '4px' }}>
+          <div style={{ color: 'white', fontSize: '16px', fontWeight: 'bold', marginTop: '4px' }}>
             {isTransacoesLoading ? (
               <div style={{
                 width: '80px',
